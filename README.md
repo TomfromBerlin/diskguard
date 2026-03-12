@@ -21,9 +21,7 @@ _Memo to self: They'll clone this repository again and again and not leave a sin
  echo "source ~/.config/zsh/plugins/zsh-disk-guard/diskguard.plugin.zsh" >> ~/.zshrc
  source ~/.zshrc
 ```
-
-For installation with the plugin manager or framework of your choice, see the 🛠️ Install section.
-This will only run the plugin temporarily. For a permanent installation, see the [Install](#install) section.
+This will only run the plugin temporarily. For permanent installation (also with the plugin manager or framework of your choice), see the 🛠️ Install section.
 </details>
 
 ## ✨ Features
