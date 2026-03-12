@@ -35,6 +35,36 @@ This will only run the plugin temporarily. For permanent installation (also with
 - 💾 **Display of useful information**: total size of data to be processed, required and available storage space on the destination disk, file name and size of the file just processed
 - ⏱️ **Display of the total time** required for the file operation(s)
 
+## ❔ Why This Plugin?
+
+- ✅ With: Predictive warnings, safe operations, peace of mind
+- ❌ Without: Disk full errors mid-copy, wasted time, corrupted files
+
+## 📝 Requirements
+
+<details><summary>**Zsh 5.0+** (released 2012)</summary>
+The version is checked when the plugin is loaded. If the version is too low, the plugin will not load. To manually check, run the following command at the command line:
+   
+  ```zsh
+  echo $ZSH_VERSION
+  ```
+  
+Upgrade: See [zsh.org](https://www.zsh.org/)
+ </details>
+ 
+<details><summary>Standard Unix tools</summary>
+
+- df: Checks and displays the free disk space. Only mounted partitions are checked.
+- stat: Used here to determine the file system status instead of the file status.
+- du: Checks and displays the used disk space.
+- cp: to copy files from one place to another
+- mv: rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY
+- furthermore: awk cut grep lsb_release rm sed sleep touch tput
+
+If one or more of these tools are unavailable, the plugin will display a message and will not load.
+
+</details>
+
 ## 🖥️ Usage
 
 Since this is a plugin, manual execution is neither necessary nor useful. The plugin reacts to certain triggers and executes the corresponding actions automatically. Simply use `cp`, `mv`, and `rsync` as usual, e.g., `cp <source> <dest>`. No additional options should be specified. The plugin in action can be seen in the following clip. The plugin's status can be checked via the command line. See the 🎛️ Control section for more information.
@@ -68,37 +98,6 @@ rsync -av files/ user@remote:/backup/  # No local check
 |:-|
 | The plugin uses its own aliases for the **`cp`** and **`mv`** commands, so if you use this plugin and **`cp`** _and/or_ **`mv`** in other scripts, you should consider prefixing the commands in those scripts with `command`, e.g., `command cp <source> <dest>`. Existing aliases are ignored because the plugin calls these programs with the `command` prefix. That said, if you rely on your existing aliases, you should not consider using this plugin.
 The functionality of the **`rsync`** program is barely affected. The plugin only checks whether the target is local or remote and whether **`rsync`** was called with options. If the target is remote or unclear, or if options are detected, all checks are skipped. If **`rsync`** is called without options and the destination is local but there is not enough disk space, a warning will be issued and a request will be made as to whether the file operation should be performed anyway. Apart from that, **`rsync`** is always called only with the user-specific options (if any), since it has its own output (e.g. its own progress bar). |
-
-## ❔ Why This Plugin?
-
-- ✅ With: Predictive warnings, safe operations, peace of mind
-- ❌ Without: Disk full errors mid-copy, wasted time, corrupted files
-
-
-## 📝 Requirements
-
-<details><summary>**Zsh 5.0+** (released 2012)</summary>
-The version is checked when the plugin is loaded. If the version is too low, the plugin will not load. To manually check, run the following command at the command line:
-   
-  ```zsh
-  echo $ZSH_VERSION
-  ```
-  
-Upgrade: See [zsh.org](https://www.zsh.org/)
- </details>
- 
-<details><summary>Standard Unix tools</summary>
-
-- df: Checks and displays the free disk space. Only mounted partitions are checked.
-- stat: Used here to determine the file system status instead of the file status.
-- du: Checks and displays the used disk space.
-- cp: to copy files from one place to another
-- mv: rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY
-- furthermore: awk cut grep lsb_release rm sed sleep touch tput
-
-If one or more of these tools are unavailable, the plugin will display a message and will not load.
-
-</details>
 
 ## 🛠️ Install
 <details><summary> ← click here</summary>
@@ -220,7 +219,7 @@ zshdg disable
 
 ```zsh
 
-zshdd unload
+zshdg unload
 rm -rf ~/.config/zsh/plugins/diskguard
 
 ```
@@ -268,21 +267,23 @@ This plugin should be ready to use right out of the box and requires no further 
 
 ```zsh
 # Set these settings before loading the plugin.
-# To do this, either find the relevant settings in the script's configuration section
-# and change only the values ​​(do not export them within the script), or enter one or
-# more of the following commands in the command line (and then export them):
+# To do this, run 'zshdg default' from the command line. Then you'll find a file named
+# 'diskguard.conf' in the plugin directory. Edit this file and change the settings.
+# or enter one or more of the following commands in the command line:
 
 # set disk usage warning threshold to 90% (default value: 80%)
-export DISKGUARD_THRESHOLD=90
+zshdg threshold 90
 
 # set scan threshold for deep check to 500 MiB (default value: 100 MiB)
-export DISKGUARD_SCAN_THRESHOLD=$((500 * 1024 * 1024))
+zshdg scan-threshold 500
 
-# Enable debug output (default value: 0)
-export DISKGUARD_DEBUG=0
+# Enable debug output (default: off)
+zshdg debug 
 
-# disable plugin (default value: 1)
-export DISKGUARD_ENABLED=1
+# disable plugin (default: enable)
+zshdg disable
+
+# Run 'zshdg' to display more commands. Each command has several ways (long, medium, short) to invoke it.
 
 # ──────────────────────────────────────────────────────────────────
 # Do not play around with the following settings! I'm serious!
