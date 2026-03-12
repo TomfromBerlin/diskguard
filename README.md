@@ -37,7 +37,7 @@ This will only run the plugin temporarily. For permanent installation (also with
 
 ## 🖥️ Usage
 
-Since this is a plugin, manual execution is neither necessary nor useful. The plugin reacts to certain triggers and executes the corresponding actions automatically. Simply use `cp`, `mv`, and `rsync` as usual, e.g., `cp <source> <dest>`. No additional options should be specified. The plugin in action can be seen in the following clip. The plugin's status can be checked via the command line. See the [Control](#control) section for more information.
+Since this is a plugin, manual execution is neither necessary nor useful. The plugin reacts to certain triggers and executes the corresponding actions automatically. Simply use `cp`, `mv`, and `rsync` as usual, e.g., `cp <source> <dest>`. No additional options should be specified. The plugin in action can be seen in the following clip. The plugin's status can be checked via the command line. See the 🎛️ Control section for more information.
 
 <details><summary> ← Click here to see two output examples with low disk space warning</summary>
 
