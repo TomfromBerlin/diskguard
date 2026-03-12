@@ -1,21 +1,15 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Zsh%20Plugin-zsh--disk--guard-blue?style=plastic">
+  <img src="https://img.shields.io/badge/Zsh%20Plugin-diskguard-blue?style=plastic">
   <img src="https://img.shields.io/badge/zsh%20version-%E2%89%A55.0-blue?style=plastic">
   <img src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20BSD-lightgrey?style=plastic">
   <img src="https://img.shields.io/badge/license-MIT-green?style=plastic">
-  <img src="https://img.shields.io/github/stars/TomfromBerlin/zsh-disk-guard?style=plastic">
-  <img src="https://img.shields.io/github/downloads/TomfromBerlin/zsh-disk-guard/total?style=plastic&labelColor=grey&color=blue">
-  </p>
-  
-_Memo to self: They'll clone this repository again and again and not leave a single comment. Yes, not even a tiny star. But at least my code is traveling around the world._
-<!--
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/TomfromBerlin/zsh-disk-guard/total?style=plastic&labelColor=grey&color=blue)
--->
+  <img src="https://img.shields.io/github/stars/TomfromBerlin/diskguard?style=plastic">
+  <img src="https://img.shields.io/github/downloads/TomfromBerlin/diskguard/total?style=plastic&labelColor=grey&color=blue">
   </p>
   
 _Memo to self: They'll clone this repository again and again and not leave a single comment. Yes, not even a tiny star. But at least my code is traveling around the world._
 
-# Zsh Disk Guard Plugin
+# Zsh DiskGuard Plugin
 
 🛡️ Intelligent disk space monitoring for write operations in Zsh
 
@@ -23,8 +17,8 @@ _Memo to self: They'll clone this repository again and again and not leave a sin
 
 ```zsh
  # Install
- git clone https://github.com/TomfromBerlin/zsh-disk-guard ~/.config/zsh/plugins/zsh-disk-guard
- echo "source ~/.config/zsh/plugins/zsh-disk-guard/zsh-disk-guard.plugin.zsh" >> ~/.zshrc
+ git clone https://github.com/TomfromBerlin/diskguard ~/.config/zsh/plugins/diskguard
+ echo "source ~/.config/zsh/plugins/zsh-disk-guard/diskguard.plugin.zsh" >> ~/.zshrc
  source ~/.zshrc
 ```
 
@@ -68,8 +62,9 @@ rsync -av files/ user@remote:/backup/  # No local check
 
 ```
 </details>
-
+<!--
 [Zsh Disk Guard feat. a progress bar.webm](https://github.com/user-attachments/assets/2ae905e8-cadd-49eb-b5e1-1d3a0a6e21e9)
+-->
 
 | 👁️‍🗨️ Note |
 |:-|
@@ -132,18 +127,26 @@ autoload -Uz zsh-defer
 # make list of the Zsh plugins you use (Consider paying attention to the loading order)
 repos=(
   # ... your other plugins ...
-  TomfromBerlin/Zsh-Disk-Guard
+  TomfromBerlin/diskguard
 )
 ```
 
 Insert the following code block before `autoload -Uz promptinit && promptinit`
 
 ```
-# tweak compinit
-alias compinit='compinit-tweak'
-compinit-tweak() {
-grep -q "ZPLUGINDIR/*/*" <<< "${@}" && \compinit "${@}"
-}
+# this block after all completion definitions (the zstyle ':completion [...] stuff)
+if [[ -f "${ZPLUGINDIR}/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]] ; then
+    source "${ZPLUGINDIR}/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+# read documentation of zsh-autocomplete
+else
+    # tweak compinit
+    alias compinit='compinit-tweak'
+    compinit-tweak() {
+    grep -q "ZPLUGINDIR/*/*" <<< "${@}" && \compinit "${@}"
+    }
+    # now load plugins
+    autoload -Uz compinit && compinit -C -d ${zdumpfile}
+fi
 # now load plugins
 plugin-load $repos
 # ZSH UNPLUGGED end
@@ -160,7 +163,7 @@ Other pluginmanagers and frameworks:
 add to your .zshrc:
 
 ```zsh
-antigen bundle TomfromBerlin/zsh-disk-guard
+antigen bundle TomfromBerlin/diskguard
 ```
 
 ### Oh-My-Zsh
@@ -168,13 +171,13 @@ antigen bundle TomfromBerlin/zsh-disk-guard
 Enter the following command on the command line and confirm with Return
 
 ```zsh
-git clone https://github.com/TomfromBerlin/zsh-disk-guard ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-disk-guard
+git clone https://github.com/TomfromBerlin/diskguard ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/diskguard
 ```
 
 then add to your .zshrc:
 
 ```zsh
-plugins=(... zsh-disk-guard)
+plugins=(... diskguard)
 ```
 
 ### Zinit
@@ -182,7 +185,7 @@ plugins=(... zsh-disk-guard)
 add to your .zshrc:
 
 ```zsh
-zinit light TomfromBerlin/zsh-disk-guard
+zinit light TomfromBerlin/diskguard
 ```
 
 You can load the plugin with any other pluginmanagers as well.
@@ -192,8 +195,8 @@ You can load the plugin with any other pluginmanagers as well.
 ### manual call via the command line
 
 ```zsh
-git clone https://github.com/TomfromBerlin/zsh-disk-guard ~/.config/zsh/plugins/zsh-disk-guard
-source ~/.config/zsh/plugins/zsh-disk-guard/zsh-disk-guard.plugin.zsh
+git clone https://github.com/TomfromBerlin/diskguard ~/.config/zsh/plugins/diskguard
+source ~/.config/zsh/plugins/zsh-disk-guard/diskguard.plugin.zsh
 ```
 
 </details>
@@ -208,7 +211,7 @@ Simply remove from your plugin list and restart Zsh.
 
 ```zsh
 
-zsh-disk-guard-disable
+zshdg disable
 
 ```
 
@@ -216,8 +219,8 @@ zsh-disk-guard-disable
 
 ```zsh
 
-zsh_disk_guard_plugin_unload
-rm -rf ~/.config/zsh/plugins/zsh-disk-guard
+zshdd unload
+rm -rf ~/.config/zsh/plugins/diskguard
 
 ```
 
@@ -269,27 +272,26 @@ This plugin should be ready to use right out of the box and requires no further 
 # more of the following commands in the command line (and then export them):
 
 # set disk usage warning threshold to 90% (default value: 80%)
-export ZSH_DISK_GUARD_THRESHOLD=90
+export DISKGUARD_THRESHOLD=90
 
-# set deep check threshold to 500 MiB (default value: 100 MiB)
-export ZSH_DISK_GUARD_DEEP_THRESHOLD=$((500 * 1024 * 1024))
+# set scan threshold for deep check to 500 MiB (default value: 100 MiB)
+export DISKGUARD_SCAN_THRESHOLD=$((500 * 1024 * 1024))
 
 # Enable debug output (default value: 0)
-export ZSH_DISK_GUARD_DEBUG=1
+export DISKGUARD_DEBUG=0
 
 # disable plugin (default value: 1)
-export ZSH_DISK_GUARD_ENABLED=0
+export DISKGUARD_ENABLED=1
 
 # ──────────────────────────────────────────────────────────────────
-# Only play around with the following settings if you really know what you're doing!
-# I'm serious!
+# Do not play around with the following settings! I'm serious!
 
 # commands to be wrapped, separated by spaces (default: "cp mv rsync")
-export ZSH_DISK_GUARD_COMMANDS="cp mv rsync"
+export DISKGUARD_COMMANDS="cp mv rsync"
 
 # However, if you want to change the default (not recommended!),
 # further customization is required, i.e. you need to create suitable wrappers.
-# See the _zsh_disk_guard_cp() function to see how this can be done.
+# See the diskguard_cp() function to see how this can be done.
 # ──────────────────────────────────────────────────────────────────
 ```
 </details>
@@ -297,17 +299,32 @@ export ZSH_DISK_GUARD_COMMANDS="cp mv rsync"
 # 🎛️ Control
 
 ```zsh
-zsh-disk-guard-status    # Shows current configuration
+zshdg status    # Shows current configuration
 ```
 
 ```zsh
-zsh-disk-guard-disable   # Temporarily disable
+zshdg disable   # Temporarily disable
 ```
 
 ```zsh
-zsh-disk-guard-enable    # Re-enable
+zshdg enable    # Re-enable
 ```
 
+```zsh
+zshdg color    # switch between color mode and B/W mode
+```
+
+```zsh
+zshdg default    # load default values
+```
+
+```zsh
+zshdg threshold N    # set warn threshold in percent (N must be a number between 1 and 99)
+```
+
+```zsh
+zshdg scan-theshold N    # set scan threshold in MB (N must be a number > 1)
+```
 # 💬 Contribute
 Issues and PRs welcome at github.com/TomfromBerlin/zsh-disk-guard
 
