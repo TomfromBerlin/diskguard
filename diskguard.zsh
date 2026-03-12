@@ -83,7 +83,7 @@ diskguard_color() {
     diskguard_color "$@"
 }
 colortest() {
-    source "${DISKGUARD_FUNC_DIR}/colortest"
+    source "${DISKGUARD_FUNC_DIR}/diskguard_color"
     colortest "$@"
 }
 diskguard_defaults() {
@@ -531,7 +531,7 @@ diskguard_plugin_unload() {
 }
 
 # ──────────────────────────────────────────────────────────────────
-# Zsh-Disk-Guard: Help & Control Interface
+# DiskGuard: Help & Control
 # ──────────────────────────────────────────────────────────────────
 zshdg_help() {
   emulate -L zsh
@@ -574,7 +574,7 @@ body_lines+=("
     ${DISKGUARD_COLOR_CYAN} -e|--enable|enable${DISKGUARD_COLOR_NC}        → enable plugin
     ${DISKGUARD_COLOR_CYAN} -D|--disable|disable${DISKGUARD_COLOR_NC}      → disable plugin
 
-    ${DISKGUARD_COLOR_CYAN} --debug|debug ${DISKGUARD_COLOR_NC}         → toggle debug mode on/off
+    ${DISKGUARD_COLOR_CYAN} --debug|debug ${DISKGUARD_COLOR_NC}            → toggle debug mode on/off
   ")
 
     local IFS=$'\n'
@@ -590,7 +590,7 @@ if [[ -z $ZSH_DG_INTERFACE_DEFINED ]]; then
     typeset -g ZSH_DG_INTERFACE_DEFINED=1
 
     diskguard() {zshdg}
-
+fi
     zshdg() {
 
         local cmd=$1
@@ -703,4 +703,3 @@ EOF
     }
 
     #compdef -k complete-word \C-x\C-r
-fi
