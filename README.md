@@ -94,6 +94,8 @@ Upgrade: See [zsh.org](https://www.zsh.org/)
 - du: Checks and displays the used disk space.
 - cp: to copy files from one place to another
 - mv: rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY
+- furthermore: awk cut grep lsb_release rm sed sleep touch tput
+If one or more of these tools are unavailable, the plugin will display a message and will not load.
 
 </details>
 
