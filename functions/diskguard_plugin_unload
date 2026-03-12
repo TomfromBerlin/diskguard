@@ -1,0 +1,52 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+diskguard_plugin_unload() {
+#    print "DEBUG: unload start" > /dev/tty
+#    emulate -L zsh
+
+#    print "DEBUG: checking commands" > /dev/tty
+    local cmd
+    if [[ -n "${diskguard_commands:-}" ]]; then
+        for cmd in ${(z)diskguard_commands}; do
+            print "DEBUG: unalias $cmd" > /dev/tty
+            unalias "$cmd"
+        done
+    fi
+
+#    print "DEBUG: fixing fpath" > /dev/tty
+    fpath=("${(@)fpath:#${0:A:h}}")
+
+#    print "DEBUG: unfunctioning" > /dev/tty
+    unfunction -m 'diskguard_*'
+
+#    print "DEBUG: checking if cleanup exists" > /dev/tty
+    if ! typeset -f diskguard_cleanup >/dev/null 2>&1; then
+        print "DEBUG: sourcing cleanup" > /dev/tty
+        source "${DISKGUARD_FUNC_DIR}/diskguard_cleanup"
+    fi
+
+#    print "DEBUG: calling cleanup" > /dev/tty
+    diskguard_cleanup
+#    print "DEBUG: after cleanup" > /dev/tty
+
+    unset diskguard_plugin_unload
+    unset DISKGUARD_LOADED
+#    print -P '\n%F{blue} Zsh zRAMDisk Plugin%f unloaded successfully.' > /dev/tty
+    return 0
+}
+
+#DISKGUARD_SCRIPT

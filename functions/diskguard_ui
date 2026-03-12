@@ -1,0 +1,336 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+
+diskguard_ui_init() {
+    emulate -L zsh
+    typeset -g distro
+    if [[ -f /etc/os-release ]] ; then
+        distro="$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr '[:upper:]' '[:lower:]')"
+
+    # Fallback lsb_release
+    elif [[ -z "${distro}" ]] && command -v lsb_release &>/dev/null ; then
+        distro="$(lsb_release -si 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+
+    # last exit
+    elif [[ -z "${distro}" ]] && [[ -f /etc/lsb-release ]] &>/dev/null ; then
+    distro="$(awk -F= '/^DISTRIB_ID/ {print $2}' /etc/lsb-release)"
+    fi
+
+    if [[ -f "${DISKGUARD_PLUGIN_DIR}"/color ]] ; then
+        #unset DISKGUARD_COLOR_{BLUE,BLUE_BOLD,BLUE_DIM,CYAN,CYAN_BOLD,GREEN,GREEN_BOLD,GREY,GREY_DIM,ITALIC,MAGENTA,MAGENTA_BOLD,MAGENTA_DIM,RED,RED_BOLD,YELLOW,YELLOW_BOLD,WHITE,WHITE_FLASH,NC}
+        DISKGUARD_COLOR_BLUE=$'\e[0;34m'
+        DISKGUARD_COLOR_BLUE_BOLD=$'\e[1;34m'
+        DISKGUARD_COLOR_BLUE_DIM=$'\e[2;34;40m'
+        DISKGUARD_COLOR_CYAN=$'\e[0;36m'
+        DISKGUARD_COLOR_CYAN_BOLD=$'\e[1;36m'
+        DISKGUARD_COLOR_GREEN=$'\e[0;32m'
+        DISKGUARD_COLOR_GREEN_BOLD=$'\e[0;32;1m'
+        DISKGUARD_COLOR_GREY=$'\e[2;37m'
+        DISKGUARD_COLOR_GREY_DIM=$'\e[2;37;40m'
+        DISKGUARD_COLOR_ITALIC=$'\e[3m'
+        DISKGUARD_COLOR_MAGENTA=$'\e[0;35m'
+        DISKGUARD_COLOR_MAGENTA_DIM=$'\e[2;35m'
+        DISKGUARD_COLOR_MAGENTA_BOLD=$'\e[1;35;1m'
+        DISKGUARD_COLOR_RED=$'\e[0;31m'
+        DISKGUARD_COLOR_RED_BOLD=$'\e[0;31;1m'
+        DISKGUARD_COLOR_YELLOW=$'\e[0;33;40m'
+        DISKGUARD_COLOR_YELLOW_BOLD=$'\e[1;33m'
+        DISKGUARD_COLOR_WHITE=$'\e[0;37;40m'
+        DISKGUARD_COLOR_WHITE_FLASH=$'\e[5;37;40m'
+        DISKGUARD_COLOR_NC=$'\e[0m'
+    else
+        #unset DISKGUARD_COLOR_{BLUE,BLUE_BOLD,CYAN,CYAN_BOLD,GREEN,GREEN_BOLD,GREY,GREY_DIM,ITALIC,MAGENTA,MAGENTA_BOLD,MAGENTA_DIM,RED,RED_BOLD,YELLOW,YELLOW_BOLD,WHITE,WHITE_FLASH,NC}
+        DISKGUARD_COLOR_BLUE=$'\e[3;37;40m'
+        DISKGUARD_COLOR_BLUE_BOLD=$'\e[0m'
+        DISKGUARD_COLOR_BLUE_DIM=$'\e[3m'
+        DISKGUARD_COLOR_CYAN=$'\e[0m'
+        DISKGUARD_COLOR_CYAN_BOLD=$'\e[0m'
+        DISKGUARD_COLOR_GREEN=$'\e[0m'
+        DISKGUARD_COLOR_GREEN_BOLD=$'\e[0m'
+        DISKGUARD_COLOR_GREY=$'\e[2;37m'
+        DISKGUARD_COLOR_GREY_DIM=$'\e[2;37;40m'
+        DISKGUARD_COLOR_ITALIC=$'\e[3m'
+        DISKGUARD_COLOR_MAGENTA=$'\e[0m'
+        DISKGUARD_COLOR_MAGENTA_BOLD=$'\e[0m'
+        DISKGUARD_COLOR_MAGENTA_DIM=$'\e[2;37;40m'
+        DISKGUARD_COLOR_RED=$'\e[3;37;40m'
+        DISKGUARD_COLOR_RED_BOLD=$'\e[0m'
+        DISKGUARD_COLOR_YELLOW=$'\e[0m'
+        DISKGUARD_COLOR_YELLOW_BOLD=$'\e[3;37;40m'
+        DISKGUARD_COLOR_WHITE=$'\e[0;37;40m'
+        DISKGUARD_COLOR_WHITE_FLASH=$'\e[5;37;40m'
+        DISKGUARD_COLOR_NC=$'\e[0m'
+    fi
+}
+
+# Quick & Dirty: replace familiar 2-column symbols to make the simple length more plausible.
+diskguard_normalize_wide_placeholder() {
+    #disk_guard_debug "${DISK_GUARD_COLOR_CYAN}disk_guard_ui:${DISK_GUARD_COLOR_NC} Reached function disk_guard_normalize_wide_placeholder" >&2
+    emulate -L zsh
+    setopt LOCALOPTIONS
+
+    # e_w = emoji_widths mapping (emoji → display width in 'O' chars)
+    local distro
+    distro=$(lsb_release -si) || distro="$(awk -F= '/^ID=/ {print $2}' /etc/os-release)" || distro="$(awk -F= '/^ID_LIKE=/ {print $2}' /etc/os-release)" || distro="$(awk -F= '/^NAME=/ {print $2}' /etc/os-release)" || distro="$(awk -F= '/^PRETTY_NAME=/ {print $2}' /etc/os-release)"
+    case "${distro}" in
+    *mint*|*LinuxMint*|*Ubuntu*|*void*|*VoidLinux*|*voidlinux*)
+    local -A e_w=(
+        🟢 OO  🔴 OO  🟡 OO  🔵 OO
+        ⚪ OO  ✅ OO  💲 OO  ✔️ OO
+        ⚠️ OO  ❌ OO  🎉 OO  ⚡ OO
+        ⚫ OO
+        ❔ O  🫟 O  ‼️ O  ℹ️ O  ⚙️ O
+    )
+    ;;
+    *cachy*|*Cachy*|*debian*|*Debian*|*Fedora*)
+    local -A e_w=(
+        🟢 OO  🔴 OO  🟡 OO  🔵 OO
+        ⚙️ OO  ✅ OO  💲 OO  ✔️ OO
+        ⚠️ OO  ❌ OO  🎉 OO  ⚡ OO
+        ⚫ OO  ⚪ OO  ℹ️ OO  ‼️ OO
+        ❔ O  🫟 O
+    )
+    ;;
+    esac
+
+    local em wi s="$1"
+    for em wi in ${(kv)e_w}; do
+        s=${s//$em/$wi}
+    done
+    printf "%s" "$s"
+}
+
+diskguard_calc_visible_length() {
+    emulate -L zsh
+    setopt LOCALOPTIONS
+
+    local str="$1"
+
+    # Remove ANSI escape sequences; we use sed for this
+    local cleanup
+    cleanup=$(echo -E "$str" | sed -r 's/\x1b\[[0-9;]*m//g')
+
+    # Replace emojis with 2-space-placeholder
+    cleanup=$(diskguard_normalize_wide_placeholder "$cleanup")
+
+    # Simulate prompt expansion for %%
+    cleanup=$(echo -E "$cleanup" | sed 's/%%/%/g')
+
+    echo ${#cleanup}
+}
+
+diskguard_print_box() {
+# Usage (the following commented lines must be placed and uncommented somewhere in a script or function,
+# where the output should be generated. You must not uncomment it here, or your output will be scrambled:
+# local -a title body footer msg
+# title=("title string, will be centered")
+# body=("
+# body content, multiple rows possible.
+# Just define the vars you need and let the others go.
+# Then choose the vars after 'diskguard_print_box' and delete the others.
+# You can also ${DISKGUARD_COLOR_GREEN}colorize${DISKGUARD_COLOR_NC} the output.
+# ")
+# footer=("string, will be centered, also multiple lines are possible")
+# msg=("msg string, each row will be prefixed with an icon, depending on the trigger word
+# [ask] [info] [ok] [err] [warn] [conf]")
+# diskguard_print_box \
+#   "${title[@]}" \
+#   "${body[@]}" \
+#   "${footer[@]}" \
+#   "info" \
+#   "${msg[@]}"
+    emulate -L zsh
+    setopt LOCALOPTIONS no_aliases
+
+    # ----------------------------------------------------------------------
+    # PARAMETER
+    # ----------------------------------------------------------------------
+
+    local title="$1" ; (( $# )) && shift
+
+    local body_raw="$1" ; (( $# )) && shift
+    local -a body_lines=("${(@f)body_raw}")
+
+    local footer_raw="$1" ; (( $# )) && shift
+    local -a footer_lines=("${(@f)footer_raw}")
+
+    local msg_type="$1" ; (( $# )) && shift
+
+    local msg_raw="$1" ; (( $# )) && shift
+    local -a msg_lines=("${(@f)msg_raw}")
+
+    # ----------------------------------------------------------------------
+    # CHECK WHICH SECTIONS HAVE CONTENT
+    # ----------------------------------------------------------------------
+    local has_body=0
+    local has_footer=0
+    local has_msg=0
+
+    # Check if *_raw contains content
+    [[ -n "${body_raw}" ]] && has_body=1
+    [[ -n "${footer_raw}" ]] && has_footer=1
+    # Check if msg_raw contains content AND msg_type is a valid type
+    [[ -n "${msg_raw}" && "${msg_type}" =~ ^(ask|info|ok|conf|warn|err)$ ]] && has_msg=1
+
+    # ----------------------------------------------------------------------
+    # CALCULATE DYNAMIC WIDTH
+    # ----------------------------------------------------------------------
+
+    if command -v tput >/dev/null && cols=$(tput cols) && (( cols > 120 )); then
+        max_width=$(( cols * 3 / 4 ))
+    else
+        max_width=90
+    fi
+    local min_width=30    # <- lower limit (optional)
+    local actual_width=0
+
+    local x len
+
+    # Check title
+    len=$(diskguard_calc_visible_length "$title")
+    (( len > actual_width )) && actual_width=$len
+
+    # Check body lines
+    for x in "${body_lines[@]}"; do
+        len=$(diskguard_calc_visible_length "$x")
+        (( len > actual_width )) && actual_width=$len
+    done
+
+    # Check footer lines
+    for x in "${footer_lines[@]}"; do
+        len=$(diskguard_calc_visible_length "$x")
+        (( len > actual_width )) && actual_width=$len
+    done
+
+    # Check message lines
+    for x in "${msg_lines[@]}"; do
+        len=$(diskguard_calc_visible_length "$x")
+        # message also includes symbol → minimal +2
+        (( len + 2 > actual_width )) && actual_width=$(( len + 2 ))
+    done
+
+    # Padding: right + left
+    inner_width=$(( actual_width - 2 ))
+    (( actual_width += 2 ))
+
+    # Applies min/max limits
+    (( actual_width < min_width )) && actual_width=$min_width
+    (( actual_width > max_width )) && actual_width=$max_width
+
+    local width=$actual_width
+    local line inner_line
+    line=$(printf '─%.0s' {1..$width})
+    inner_line=$(printf '─%.0s' {1..$inner_width})
+
+    # ----------------------------------------------------------------------
+    # HEADER
+    # ----------------------------------------------------------------------
+    print -P "${DISKGUARD_COLOR_MAGENTA_DIM}╭${line}╮${DISKGUARD_COLOR_NC}"
+
+    # ----------------------------------------------------------------------
+    # TITLE (always centered)
+    # ----------------------------------------------------------------------
+    local tlen=$(diskguard_calc_visible_length "$title")
+    local tpad=$(( (width - tlen) / 2 ))
+    local tpad_r=$(( width - tlen - tpad ))
+# The following lines must not be indented, otherwise the padding will not be calculated correctly.
+print -P "${DISKGUARD_COLOR_MAGENTA_DIM}│${DISKGUARD_COLOR_NC}\
+$(printf ' %.0s' {1..$tpad})${title}\
+$(printf ' %.0s' {1..$tpad_r})\
+${DISKGUARD_COLOR_MAGENTA_DIM}│${DISKGUARD_COLOR_NC}"
+
+    if (( has_body || has_footer || has_msg )) ; then
+        print -P "${DISKGUARD_COLOR_MAGENTA_DIM}├${line}┤${DISKGUARD_COLOR_NC}"
+    fi
+
+    # ----------------------------------------------------------------------
+    # BODY
+    # ----------------------------------------------------------------------
+    if (( has_body )) ; then
+        for line_text in "${body_lines[@]}"; do
+            vlen=$(diskguard_calc_visible_length "$line_text")
+            pad=$(( width - vlen ))
+            printf -v padding "%${pad}s" ""
+            print -P "${DISKGUARD_COLOR_MAGENTA_DIM}│${DISKGUARD_COLOR_NC}${line_text}${padding}${DISKGUARD_COLOR_MAGENTA_DIM}│${DISKGUARD_COLOR_NC}"
+        done
+    fi
+
+    # ----------------------------------------------------------------------
+    # FOOTER (always centered)
+    # ----------------------------------------------------------------------
+    if (( has_footer )) ; then
+        if (( has_body || has_msg )) ; then
+            print -P "${DISKGUARD_COLOR_MAGENTA_DIM}├${line}┤${DISKGUARD_COLOR_NC}"
+        fi
+
+        for x in "${footer_lines[@]}"; do
+            local flen=$(diskguard_calc_visible_length "$x")
+            local fpad=$(( (width - flen) / 2 ))
+            local fpad_r=$(( width - flen - fpad ))
+# The following lines must not be indented, otherwise the padding will not be calculated correctly.
+print -P "${DISKGUARD_COLOR_MAGENTA_DIM}│${DISKGUARD_COLOR_NC}\
+$(printf ' %.0s' {1..$fpad})${x}\
+$(printf ' %.0s' {1..$fpad_r})\
+${DISKGUARD_COLOR_MAGENTA_DIM}│${DISKGUARD_COLOR_NC}"
+        done
+    fi
+
+    # ----------------------------------------------------------------------
+    # MESSAGES
+    # ----------------------------------------------------------------------
+    if (( has_msg )); then
+        if (( has_body || has_footer )) ; then
+            print -P "${DISKGUARD_COLOR_MAGENTA_DIM}├${line}┤${DISKGUARD_COLOR_NC}"
+        fi
+
+        local color symbol msg mpad mlen msgpad
+        # Icons are hard-coded to avoid font dependencies.
+        # If you add or replace other icons (and trigger words),
+        # be sure to include them in the diskguard_normalize_wide_placeholder function,
+        # otherwise the padding will not work correctly.
+        case "$msg_type" in
+            ask)  symbol="❔ " ;;
+            info) symbol="ℹ️ " ;;
+            ok)   symbol="✅ " ;;
+            conf) symbol="⚙️ " ;;
+            warn) symbol="⚠️ " ;;
+            err)  symbol="❌ " ;;
+              *)  symbol="🫟 " ;;
+        esac
+
+        for msg in "${msg_lines[@]}"; do
+            if [[ $msg_type == "ask" || $msg_type == "conf" ]] ; then
+                mlen=$(diskguard_calc_visible_length "$symbol$msg")
+                mpad=$(( width - mlen - 1 ))
+            else
+                mlen=$(diskguard_calc_visible_length "$symbol$msg")
+                mpad=$(( width - mlen ))
+            fi
+            printf -v msgpad "%${mpad}s"
+            print -P "${DISKGUARD_COLOR_MAGENTA_DIM}│${symbol}${msg}${msgpad}${DISKGUARD_COLOR_MAGENTA_DIM}│${DISKGUARD_COLOR_NC}"
+        done
+    fi
+
+    # ----------------------------------------------------------------------
+    # BOTTOM LINE
+    # ----------------------------------------------------------------------
+    print -P "${DISKGUARD_COLOR_MAGENTA_DIM}╰${line}╯${DISKGUARD_COLOR_NC}"
+}
+# Initialize color variables immediately upon loading
+diskguard_ui_init "${@}"
+
+#DISKGUARD_SCRIPT

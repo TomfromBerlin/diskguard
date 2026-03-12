@@ -1,0 +1,46 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+diskguard_missing_tools(){
+# Check for required tools
+local -a missing_tools=()
+local tools
+for tools in awk cp cut df du grep lsb_release mv rm rsync sed sleep stat touch tput ; do
+    if ! command -v "${tools}" &>/dev/null ; then
+        missing_tools+=("${tools}")
+    fi
+done
+
+if (( ${#missing_tools[@]} > 0 )); then
+    if  ! command -v gdbus &>/dev/null ; then
+        print -P "Missing one or more required tools:%F{red} gdbus ${missing_tools}%f" &>/dev/tty
+        print -P "%F{yellow}  DiskGuard not loaded%f" &>/dev/tty
+        unset missing_tools tools
+        source "${DISKGUARD_FUNC_DIR}/diskguard_plugin_unload" && diskguard_plugin_unload
+    else
+    #    [[ -f "${DISKGUARD_PLUGIN_DIR}/diskguard_notify_p" ]] && command rm "${DISKGUARD_PLUGIN_DIR}/diskguard_notify_p"
+        gdbus call --session \
+        --dest=org.freedesktop.Notifications \
+        --object-path=/org/freedesktop/Notifications \
+        --method=org.freedesktop.Notifications.Notify \
+        "" 0 "" "DiskGuard Plugin Message" "Missing one or more required tools:\n ${missing_tools[*]}\n DiskGuard not loaded." \
+        '[]' '{"urgency": <2>}' 30000
+        unset missing_tools tools
+        source "${DISKGUARD_FUNC_DIR}/diskguard_plugin_unload" && diskguard_plugin_unload
+        return 1
+    fi
+fi
+}

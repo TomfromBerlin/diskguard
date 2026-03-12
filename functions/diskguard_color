@@ -1,0 +1,28 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+diskguard_color() {
+    if  [[ -f "${DISKGUARD_PLUGIN_DIR}/color" ]] ; then
+        command rm "${DISKGUARD_PLUGIN_DIR}"/color
+        zshdg reload
+        clear
+    else
+        command touch "${DISKGUARD_PLUGIN_DIR}"/color
+        zshdg reload
+        clear
+    fi
+    zshdg
+}

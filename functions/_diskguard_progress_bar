@@ -1,0 +1,99 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+# ──────────────────────────────────────────────────────────────────
+# Pac-Man style progress bar
+# Arguments:
+#   $1 = current progress (0-100)
+#   $2 = total (usually 100)
+#   $3 = total number of files (for display)
+# ──────────────────────────────────────────────────────────────────
+_diskguard_progress_bar() {
+  local LC_ALL=C
+  local current=$1
+  local total=$2
+  local file_count=${3:-0}
+
+  # Color definitions
+  if [[ -f "${DISKGUARD_PLUGIN_DIR}"/color ]] ; then
+    local GREEN=$'\e[0;32;40m'
+    local BROWN=$'\e[0;33;40m'
+    local YELLOW=$'\e[1;33;40m'
+    local RED=$'\e[0;31;40m'
+    local NC=$'\e[0m'
+  else
+    local GREEN=$'\e[0;37;40m'
+    local BROWN=$'\e[2;37;40m'
+    local YELLOW=$'\e[0;37;40m'
+    local RED=$'\e[1;30;40m'
+    local NC=$'\e[0m'
+  fi
+
+  # Pac-Man characters
+  local pm_char1="${YELLOW}C${NC}"    # Pac-Man mouth open
+  local pm_char2="${YELLOW}c${NC}"    # Pac-Man mouth closed
+  local bar_char1="${BROWN}.${NC}"    # Trail behind Pac-Man
+  local bar_char2="${GREEN}o${NC}"    # Dots to eat
+
+  local perc_done=$((current * 100 / total))
+
+  # Build suffix
+  local suffix
+  if (( file_count > 0 )); then
+    suffix=$(printf ' Files: %d (%d%%)' "$file_count" "$perc_done")
+  else
+    suffix=$(printf ' %d%% ' "$perc_done")
+  fi
+
+  local length=$(( COLUMNS - 2 - ${#suffix} ))
+  (( length < 0 )) && length=0
+
+  local num_bars=$((perc_done * length / 100))
+  local pos=$((num_bars - 1))
+  (( pos < 0 )) && pos=0
+
+  # Color based on percentage (red < 31%, yellow < 61%, green >= 61%)
+  local perc_color
+  if (( perc_done < 31 )); then
+      perc_color=${RED}
+  elif (( perc_done < 61 )); then
+      perc_color=${YELLOW}
+  else
+      perc_color=${GREEN}
+  fi
+
+  # Build progress bar
+  local bar='['
+  local i
+  for ((i = 0; i < length; i++)); do
+    if (( i < pos )); then
+        bar+=$bar_char1  # Trail behind Pac-Man
+    elif (( i == pos && perc_done < 100 )); then
+        # Pac-Man animation (alternates between open/closed mouth)
+        (( i % 2 == 0 )) && bar+=$pm_char1 || bar+=$pm_char2
+    else
+        bar+=$bar_char2  # Dots in front of Pac-Man
+    fi
+  done
+  bar+=']'
+
+  # Display progress bar at bottom of terminal
+  printf '\e[s'                      # Save cursor position
+  printf '\e[%d;1H' "$LINES"         # Move to bottom row, first column
+  printf '%s Files: %d (%s%d%%%s)' "$bar" "$file_count" "$perc_color" "$perc_done" "$NC"
+  printf '\e[K'                      # Clear rest of line
+  printf '\e[u'                      # Restore cursor position
+}

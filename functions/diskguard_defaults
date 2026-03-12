@@ -1,0 +1,84 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+# ──────────────────────────────────────────────────────────────────
+#  Configuration defaults
+# ──────────────────────────────────────────────────────────────────
+diskguard_defaults() {
+    local config_file
+    config_file="${DISKGUARD_PLUGIN_DIR}/diskguard.conf"
+
+    # Disk usage threshold (percentage)
+    typeset -g DISKGUARD_THRESHOLD=80
+    # Size threshold for deep checking (bytes)
+    typeset -g DISKGUARD_SCAN_THRESHOLD=$((100 * 1000 * 1000))  # 95.36 MiB
+    # Enable debug output
+    typeset -g DISKGUARD_VAR_DEBUG=0
+    # Enable/disable the plugin
+    typeset -g DISKGUARD_ENABLED=1
+    # Commands to wrap (space-separated)
+    typeset -g DISKGUARD_COMMANDS="cp mv rsync"
+
+    if [[ ! -f "$config_file" ]]; then
+        touch "${config_file}"
+        diskguard_write_config
+        if command -v bat >/dev/null ; then
+            bat -f -l=ini "$config_file"
+        else
+            printf '\n%s\n' "content of ${config_file}:"
+            cat "$config_file"
+        fi
+    else
+
+        local -a title body footer space_left debug_status
+
+    space_left="$(( 100 - ${DISKGUARD_THRESHOLD} ))"
+    diskguard_func_debug "Loading default values"
+    if [[ $DISKGUARD_VAR_DEBUG == 0 ]]; then
+        debug_status="${DISKGUARD_COLOR_RED}disabled${DISKGUARD_COLOR_NC}"
+    else
+        debug_status="${DISKGUARD_COLOR_GREEN}enabled${DISKGUARD_COLOR_NC}"
+    fi
+
+    if [[ ${DISKGUARD_ENABLED} == 1 ]]; then
+        local enabled_status="${DISKGUARD_COLOR_GREEN}enabled${DISKGUARD_COLOR_NC}"
+    else
+        local enabled_status="${DISKGUARD_COLOR_RED}disabled${DISKGUARD_COLOR_NC}"
+    fi
+
+    title=(${DISKGUARD_COLOR_YELLOW}"Default Values${DISKGUARD_COLOR_NC}")
+    body=("
+Threshold        = ${DISKGUARD_COLOR_CYAN}${DISKGUARD_THRESHOLD}${DISKGUARD_COLOR_GREY}%%${DISKGUARD_COLOR_NC}
+    ${DISKGUARD_COLOR_GREY}╰─ warns if disk space running on empty (< ${space_left}%%)
+
+Scan Threshold   = ${DISKGUARD_COLOR_CYAN}$(_diskguard_format_size ${DISKGUARD_SCAN_THRESHOLD})${DISKGUARD_COLOR_NC}
+
+Plugin status    = ${DISKGUARD_COLOR_CYAN}${enabled_status}${DISKGUARD_COLOR_NC}
+Debug Mode       = ${DISKGUARD_COLOR_CYAN}${debug_status}${DISKGUARD_COLOR_NC}
+
+${DISKGUARD_COLOR_GREY}not meant to be changed:${DISKGUARD_COLOR_NC}
+Command Wrappers = ${DISKGUARD_COLOR_BLUE}${DISKGUARD_COMMANDS}${DISKGUARD_COLOR_NC}
+    ")
+    footer=("Run ${DISKGUARD_COLOR_GREEN}zshdg${DISKGUARD_COLOR_NC} to learn how to change values.")
+    diskguard_print_box \
+        "${title[@]}" \
+        "${body[@]}" \
+        "${footer[@]}" \
+        "" \
+        ""
+        unset gib rem_gib mb rem_mb mib rem_mib kib
+    fi
+}

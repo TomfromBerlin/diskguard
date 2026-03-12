@@ -1,0 +1,43 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+diskguard_func_debug() {
+    emulate -L zsh
+    setopt LOCALOPTIONS
+    local LC_ALL=C
+    (( DISKGUARD_DEBUG )) || return
+#    (( diskguard_func_debug  )) && print -P "%F{cyan}DEBUG:%f $*" >&2
+
+    # Stackinfo: file:line:function
+    local row_nr info file line func
+    row_nr=${funcfiletrace[1]#*:}
+    info=${funcfiletrace[1]}
+    file=${info%%:*}
+    line=${info#*:}; line=${line%%:*}
+    func=${info##*:}
+
+    # Variations of debug output
+    # Define the msg output inside the script like: 'diskguard_func_debug "${DISKGUARD_COLOR_YELLOW}script/func name:${DISKGUARD_COLOR_NC} Reached func <name>" >&2'
+    # Mind the doublequotes!
+
+    # Let's have verbose information collected automatically
+    print -P "${DISKGUARD_COLOR_YELLOW}DEBUG:${DISKGUARD_COLOR_NC} $* [${file:t}:${line} → ${func}]" >&2
+
+    # or just the msg defined in the script followed by the row number (starting at row 1 of the script, not the function!)
+    #print -P "${DISKGUARD_COLOR_YELLOW}DEBUG:${DISKGUARD_COLOR_NC} $* ${row_nr})" >&2
+}
+#trap diskguard_func_debug DEBUG
+#DISKGUARD_SCRIPT

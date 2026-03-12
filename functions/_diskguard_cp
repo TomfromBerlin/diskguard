@@ -1,0 +1,246 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+
+# ──────────────────────────────────────────────────────────────────
+# Wrapper for 'cp' command with disk guard and progress bar
+# ──────────────────────────────────────────────────────────────────
+_diskguard_cp() {
+    # Save and disable xtrace to prevent variable assignment output
+    local xtrace_was_set=0
+    [[ $- == *x* ]] && xtrace_was_set=1
+    set +x
+
+    # Save REPORTTIME and disable it temporarily (set to very high value)
+    local saved_reporttime=${REPORTTIME:-}
+    local reporttime_was_set=$+REPORTTIME
+    REPORTTIME=999999
+
+    local LC_ALL=C
+
+    # If plugin is disabled, just run normal cp
+    (( DISKGUARD_ENABLED )) || { cp "$@"; return $?; }
+
+    local args=("$@")
+    local target="${args[-1]}"
+    local sources=("${args[@]:0:-1}")
+
+    # ──────────────────────────────────────────────────────────────
+    # Check for missing source files BEFORE any other operation
+    # ──────────────────────────────────────────────────────────────
+    local missing_files=()
+    local existing_sources=()
+
+    for source in "${sources[@]}"; do
+        if [[ ! -e "$source" ]]; then
+            missing_files+=("${source:t}")
+        else
+            existing_sources+=("$source")
+        fi
+    done
+
+    # If files are missing, warn user and ask whether to continue
+    if (( ${#missing_files[@]} > 0 )); then
+        printf '\n%s\n' "⚠️  ${DISKGUARD_COLOR_RED}Warning${DISKGUARD_COLOR_NC}: ${DISKGUARD_COLOR_YELLOW_BOLD}${#missing_files[@]}${DISKGUARD_COLOR_NC} source file(s) ${DISKGUARD_COLOR_RED}not found${DISKGUARD_COLOR_NC}:" >&2
+        for file in "${missing_files[@]}"; do
+            printf '   %s %s\n' "❌" "${DISKGUARD_COLOR_CYAN}${file}${DISKGUARD_COLOR_NC}" >&2
+        done
+        printf '\n'
+
+        if (( ${#existing_sources[@]} > 0 )); then
+            read -q "reply?Continue with remaining ${DISKGUARD_COLOR_YELLOW_BOLD}${#existing_sources[@]}${DISKGUARD_COLOR_NC} file(s)? [y/N] " </dev/tty
+            echo
+            if [[ "$reply" != [Yy] ]]; then
+                printf '%s\n' "Operation cancelled."
+                # Restore settings before returning
+                if (( reporttime_was_set )); then
+                    REPORTTIME=$saved_reporttime
+                else
+                    unset REPORTTIME
+                fi
+                (( xtrace_was_set )) && set -x
+                return 1
+            fi
+        else
+            printf '%s\n' "❌ ${DISKGUARD_COLOR_RED}Error${DISKGUARD_COLOR_NC}: No valid source files found. Operation cancelled." >&2
+            # Restore settings before returning
+            if (( reporttime_was_set )); then
+                REPORTTIME=$saved_reporttime
+            else
+                unset REPORTTIME
+            fi
+            (( xtrace_was_set )) && set -x
+            return 1
+        fi
+
+        # Update sources to only include existing files
+        sources=("${existing_sources[@]}")
+    fi
+
+    # Verify disk space before starting (only for existing files)
+    _diskguard_verify "$target" "${sources[@]}" || return 1
+
+    local total_files=${#sources[@]}
+    local file_idx=0
+    local total_bytes_copied=0
+    local start_time=${SECONDS}
+
+    _diskguard_init_term
+
+    # ──────────────────────────────────────────────────────────────
+    # We need to enable a trap for ^C so that we can call tput cnorm
+    # and the cursor will become visible again when ^C is pressed.
+    # ──────────────────────────────────────────────────────────────
+    trap '_diskguard_deinit_term; tput cnorm 2>/dev/null; printf "\n\n  ^C – operation cancelled\n\n"; return 1' INT
+
+    # Disable job control messages temporarily
+    setopt LOCAL_OPTIONS NO_NOTIFY NO_MONITOR
+
+    for source in "${sources[@]}"; do
+        (( file_idx++ ))
+
+        # Get source file size (suppress trace output)
+        local source_size=$(set +x; [[ -f "$source" ]] && (command stat -c%s "$source" 2>/dev/null || command stat -f%z "$source" 2>/dev/null || echo 0) || echo 0)
+
+        # Display current file with size
+        local size_display=$(_diskguard_format_size $source_size)
+        printf '\n    → %s (%s)' "${source:t}" "$size_display"
+
+        target_file="$target/${source:t}"
+
+        # Check if target file exists and prompt for overwrite (interactive mode only)
+        if [[ -f "$target_file" ]] && [[ -o interactive ]]; then
+            printf '\n%s\n' "⚠️  ${DISKGUARD_COLOR_RED}Warning${DISKGUARD_COLOR_NC}: ${DISKGUARD_COLOR_CYAN}${target_file:t}${DISKGUARD_COLOR_NC} already exists in ${DISKGUARD_COLOR_CYAN}${args[-1]}${DISKGUARD_COLOR_NC}!" >&2
+            read -q "reply?    Overwrite ${target_file:t}? [y/N] " </dev/tty
+            echo
+            if [[ "$reply" != [Yy] ]]; then
+                printf '%s\n\n' "    Skipped: ${source:t}"
+                continue
+            fi
+        fi
+
+        # Start cp in background (with -f to force overwrite after user confirmation)
+        command cp -f "$source" "$target" &
+        local cp_pid=$!
+
+        # Monitor copy progress by checking destination file size
+        if (( source_size > 0 )); then
+            while kill -0 $cp_pid 2>/dev/null; do
+                if [[ -f "$target_file" ]]; then
+                    # local cur_size cur_file_pct tot_pct overall_pct ← this will pollute the output
+                    # Get current size of destination file
+                    local cur_size=$(set +x; command stat -c%s "$target_file" 2>/dev/null || command stat -f%z "$target_file" 2>/dev/null || echo 0)
+
+                    # Calculate progress: (completed_files * 100 + current_file_percent) / total_files
+                    local cur_file_pct=$((cur_size * 100 / source_size))
+                    (( cur_file_pct > 100 )) && cur_file_pct=100
+
+                    local tot_pct=$(( (file_idx - 1) * 100 + cur_file_pct ))
+                    local overall_pct=$(( tot_pct / total_files ))
+
+                    # Show progress with file count
+                    _diskguard_progress_bar $overall_pct 100 $total_files
+                else
+                    # File doesn't exist yet, show progress for completed files
+                    _diskguard_progress_bar $((file_idx - 1)) $total_files $total_files
+                fi
+                sleep 0.1
+            done
+        else
+            # Unknown size or directory, just show file count progress
+            while kill -0 $cp_pid 2>/dev/null; do
+                _diskguard_progress_bar $file_idx $total_files $total_files
+                sleep 0.2
+            done
+        fi
+
+        # Wait for cp to complete and get exit status
+        wait $cp_pid
+        local cp_status=$?
+
+        # Check if cp failed
+        if (( cp_status != 0 )); then
+            printf '\n❌ Error copying %s (exit code: %d)\n' "${source:t}" "$cp_status" >&2
+            _diskguard_deinit_term
+            # Restore REPORTTIME settings
+            if (( reporttime_was_set )); then
+                REPORTTIME=$saved_reporttime
+            else
+                unset REPORTTIME
+            fi
+            (( xtrace_was_set )) && set -x
+            return $cp_status
+        fi
+
+        # Add to total bytes copied
+        (( total_bytes_copied += source_size ))
+
+        # Update progress bar for completed file
+        _diskguard_progress_bar $(( file_idx * 100 / total_files )) 100 $total_files
+    done
+
+    # Ensure 100% at the end
+    _diskguard_progress_bar 100 100 $total_files
+
+    # ──────────────────────────────────────────────────────────────
+    # now we can deactivate the trap
+    # ──────────────────────────────────────────────────────────────
+    trap - INT
+
+    _diskguard_deinit_term
+
+    # Calculate elapsed time and format it cleanly
+    local elapsed=$((SECONDS - start_time))
+    local elapsed_display
+
+    # Convert to integer to avoid floating point issues
+    local elapsed_int=${elapsed%.*}
+
+    if (( elapsed_int < 60 )); then
+        elapsed_display=$(printf '%ds' "$elapsed_int")
+    elif (( elapsed_int < 3600 )); then
+        local minutes=$((elapsed_int / 60))
+        local seconds=$((elapsed_int % 60))
+        elapsed_display=$(printf '%dm %ds' "$minutes" "$seconds")
+    else
+        local hours=$((elapsed_int / 3600))
+        local minutes=$(((elapsed_int % 3600) / 60))
+        local seconds=$((elapsed_int % 60))
+        elapsed_display=$(printf '%dh %dm %ds' "$hours" "$minutes" "$seconds")
+    fi
+
+    # Display success summary
+    if [[ $total_bytes_copied = 0 ]]; then
+       printf '\n%s\n\n' "ℹ️   Nothing has changed!"
+    else
+       printf '\n\n✅  Done! Copied %s in %s\n\n' "$(_diskguard_format_size $total_bytes_copied)" "$elapsed_display"
+    fi
+
+    # Restore REPORTTIME to original state
+    if (( reporttime_was_set )); then
+        REPORTTIME=$saved_reporttime
+    else
+        unset REPORTTIME
+    fi
+
+    # Restore xtrace if it was set
+    (( xtrace_was_set )) && set -x
+
+    # cleanup
+    unset reporttime_was_set saved_reporttime total_bytes_copied xtrace_was_set
+
+    return 0
+}

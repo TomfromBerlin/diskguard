@@ -1,0 +1,73 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+# ──────────────────────────────────────────────────────────────────
+# Wrapper for 'rsync' command with disk guard
+# Note: rsync has its own progress indicator, so no additional indicator is needed.
+# However, we will force the progress indicator to display if no other options are specified.
+# ──────────────────────────────────────────────────────────────────
+_diskguard_rsync() {
+    local LC_ALL=C
+    local args=("$@")
+    local target="${args[-1]}"
+    local sources=("${args[@]:0:-1}")
+
+    # Check options (always, regardless of plugin status)
+    local has_options=0
+    for arg in "${args[@]}"; do
+        [[ "$arg" == -* ]] && has_options=1 && break
+    done
+
+    # Warning if no options are available (always, even if the plugin is disabled)
+    if (( !has_options )); then
+        printf '%s\n' "⚠️  ${DISKGUARD_COLOR_YELLOW_BOLD}Warning${DISKGUARD_COLOR_NC}: rsync called without options." >&2
+        printf '%s\n' "   Existing files will be overwritten without confirmation!" >&2
+        read -q "REPLY?Continue anyway? [y/N] " </dev/tty
+        echo
+        [[ "$REPLY" != [Yy] ]] && return 1
+    fi
+
+    # Plugin disabled → run directly (but warning was already displayed)
+    (( DISKGUARD_ENABLED )) || {
+        if (( !has_options )); then
+            command rsync --itemize-changes --progress "$@"
+        else
+            command rsync "$@"
+        fi
+    return $?
+    }
+
+    # Remote, Option-like, or unclear destination → skip check
+    if [[ "$target" == *:* ]] || [[ "$target" == -* ]] || [[ ! -e "$target" && "$target" != */* ]]; then
+        _diskguard_debug "Remote/unclear target → skip check"
+        if (( !has_options )); then
+            command rsync --itemize-changes --progress "$@"
+        else
+            command rsync "$@"
+        fi
+        return $?
+    fi
+
+    # Check storage space
+    _diskguard_verify "$target" "${sources[@]}" || return 1
+
+    if (( !has_options )); then
+        command rsync --itemize-changes --progress "$@"
+    else
+        command rsync "$@"
+    fi
+    return $?
+}

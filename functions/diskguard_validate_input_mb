@@ -1,0 +1,45 @@
+
+diskguard_validate_input_mb() {
+
+    if [[ -z $1 ]] ; then
+        #prevent polluting the output
+        unset title body
+        # prepare new output
+        local title body _input
+        title=("⚡ ${DISKGUARD_COLOR_YELLOW_BOLD}[DiskGuard] - User action required!${DISKGUARD_COLOR_NC}")
+        body=("${DISKGUARD_COLOR_GREEN}Enter a value for the scan threshold in megabyte: ${DISKGUARD_COLOR_NC}")
+        # display output
+        #clear
+        diskguard_print_box \
+        "${title[@]}" \
+        "${body[@]}"
+        read -r _input
+        if [[ ! "$_input" =~ ^[0-9]+$ ]] || (( _input < 1 )); then
+            unset title body
+            local title body
+            title=("❌ ${DISKGUARD_COLOR_RED}Error${DISKGUARD_COLOR_NC}")
+            body=("${DISKGUARD_COLOR_YELLOW_BOLD}Scan threshold must be an integer not less than 1!${DISKGUARD_COLOR_NC}
+        ${DISKGUARD_COLOR_GREEN}Using the default value of 100 MiB.${DISKGUARD_COLOR_NC}")
+            diskguard_print_box "${title[@]}" "${body[@]}"
+            val=100
+            unset _input
+            return 0
+        else
+            val=${_input}
+            unset _input
+            return 0
+        fi
+    elif [[ ! "${1}" =~ ^[0-9]+$ ]] || (( ${1} < 1 )); then
+        unset title body
+        local title body
+        title=("❌ ${DISKGUARD_COLOR_RED}Error${DISKGUARD_COLOR_NC}")
+        body=("${DISKGUARD_COLOR_YELLOW_BOLD}Scan threshold must be an integer not less than 1!${DISKGUARD_COLOR_NC}
+        ${DISKGUARD_COLOR_GREEN}Using the default value of 100 MiB.${DISKGUARD_COLOR_NC}")
+        diskguard_print_box "${title[@]}" "${body[@]}"
+        val=100
+        unset _input
+        return 0
+    else
+        val=${1}
+    fi
+}

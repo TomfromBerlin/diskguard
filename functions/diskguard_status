@@ -1,0 +1,62 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+diskguard_status() {
+    emulate -L zsh
+    local space_left enabled_status debug_status
+
+    if (( DISKGUARD_ENABLED )); then
+        enabled_status="${DISKGUARD_COLOR_GREEN}enabled${DISKGUARD_COLOR_NC}"
+    else
+        enabled_status="${DISKGUARD_COLOR_RED}disabled${DISKGUARD_COLOR_NC}"
+    fi
+
+    if [[ -n $DB_VAR ]] ; then
+        debug_status="${DISKGUARD_COLOR_GREEN}enabled${DISKGUARD_COLOR_NC}"
+    else
+        debug_status="${DISKGUARD_COLOR_RED}disabled${DISKGUARD_COLOR_NC}"
+    fi
+
+    space_left=$(( 100 - $DISKGUARD_THRESHOLD ))
+
+    local title body footer
+    title=("${DISKGUARD_COLOR_YELLOW_BOLD}[DiskGuard] Current configuration${DISKGUARD_COLOR_NC}")
+    body=("
+Target Drive Threshold: ${DISKGUARD_COLOR_CYAN}$DISKGUARD_THRESHOLD%%${DISKGUARD_COLOR_NC}
+${DISKGUARD_COLOR_GREY}Warns when only ${space_left}%% or less space remains.${DISKGUARD_COLOR_NC}
+
+Scan threshold: ${DISKGUARD_COLOR_CYAN}$(_diskguard_format_size $DISKGUARD_SCAN_THRESHOLD)${DISKGUARD_COLOR_NC}
+${DISKGUARD_COLOR_GREY}Files ≥ threshold will be deep checked (using stat/du,recursive),${DISKGUARD_COLOR_NC}
+${DISKGUARD_COLOR_GREY}smaller files will be quick checked (metadata only).${DISKGUARD_COLOR_NC}
+${DISKGUARD_COLOR_GREY}→ man stat, man du${DISKGUARD_COLOR_NC}
+")
+
+    footer=("Plugin: ${enabled_status}           Debug: ${debug_status}")
+    clear
+    diskguard_print_box \
+        ${title[@]} \
+        ${body[@]} \
+        "${footer[@]}"
+
+#     print -P "%F{blue}═══ Zsh Disk Guard Status ═══%f"
+#     print -P "  Enabled: ${enabled_status}"
+#     print -P "  Threshold: ${DISKGUARD_COLOR_YELLOW_BOLD}${DISKGUARD_THRESHOLD}${DISKGUARD_COLOR_NC}"
+#     print -P "  Deep check threshold: $DISKGUARD_SCAN_THRESHOLD"
+#     print -P "  Debug: ${debug_status}"
+#     print -P "  Wrapped commands: %F{cyan}${DISKGUARD_COMMANDS}%f"
+
+}
+

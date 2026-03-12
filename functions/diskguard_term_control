@@ -1,0 +1,43 @@
+##########################################################################
+#                                                                        #
+#     Everything below this line comes with no warranty of any kind.     #
+#                 Use these file at your own risk!                       #
+#                                                                        #
+# project start: 2025-10 | first release: 2026-02 | last update: 2026-03 #
+##########################################################################
+#                                                                        #
+# The MIT license applies to this and all related files.                 #
+# If you want to modify, remix the code, or give it to your cat, this is #
+# only possible under the terms of this license, and you must distribute #
+# a copy of this license along with the remixed or modified code.        #
+# Yes, even to your cat.                                                 #
+#                                                                        #
+# TomfromBerlin 2025-2026                                                #
+##########################################################################
+# ──────────────────────────────────────────────────────────────────
+# Initialize terminal for progress bar display
+# - Creates space for progress bar at bottom
+# - Makes cursor invisible
+# ──────────────────────────────────────────────────────────────────
+_diskguard_init_term() {
+    printf '\n'                                          # Ensure space for progress bar
+    printf '\e[s'                                        # Save cursor location
+    printf '\e[%d;%dr' 1 "$((LINES - 1))"               # Set scrollable region (leave bottom line)
+    printf '\e[u'                                        # Restore cursor location
+    printf '\e[1A'                                       # Move cursor up one line
+    tput civis                                           # Make cursor invisible
+}
+
+# ──────────────────────────────────────────────────────────────────
+# Restore terminal to normal state
+# - Resets scrollable region
+# - Makes cursor visible again
+# ──────────────────────────────────────────────────────────────────
+_diskguard_deinit_term() {
+  printf '\e[s'                              # Save cursor location
+  printf '\e[%d;%dr' 1 "$LINES"             # Reset scrollable region
+  printf '\e[%d;%dH' "$LINES" 1             # Move to bottom line
+  printf '\e[0K'                            # Clear the line
+  printf '\e[u'                             # Restore cursor location
+  tput cnorm                                # Make cursor visible
+}
