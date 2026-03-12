@@ -590,7 +590,7 @@ if [[ -z $ZSH_DG_INTERFACE_DEFINED ]]; then
     typeset -g ZSH_DG_INTERFACE_DEFINED=1
 
     diskguard() {zshdg}
-fi
+
     zshdg() {
 
         local cmd=$1
@@ -703,3 +703,4 @@ EOF
     }
 
     #compdef -k complete-word \C-x\C-r
+fi
