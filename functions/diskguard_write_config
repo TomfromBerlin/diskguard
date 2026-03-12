@@ -74,7 +74,6 @@ Press any key to continue...")
         "${title[@]}" \
         "${body[@]}" \
         "${footer[@]}"
-        read -sk1
         return 0
 }
 
