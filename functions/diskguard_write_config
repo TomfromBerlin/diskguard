@@ -54,7 +54,6 @@ diskguard_write_config() {
             print -- '# ╭───────────────────────────────────────────────────────────────╮'
             print -- "# │  generated: $(date +%d-%m-%Y), $(date +%H:%M:%S)                              │"
             print -- '# ╰───────────────────────────────────────────────────────────────╯'
-            print -- "# Generation date & time: $(date +%d-%m-%Y), $(date +%H:%M:%S)"
             print -- ''
         }>&$dgcfgfd
         exec {dgcfgfd}>&- # close file descriptor
