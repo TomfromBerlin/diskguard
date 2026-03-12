@@ -95,6 +95,7 @@ Upgrade: See [zsh.org](https://www.zsh.org/)
 - cp: to copy files from one place to another
 - mv: rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY
 - furthermore: awk cut grep lsb_release rm sed sleep touch tput
+
 If one or more of these tools are unavailable, the plugin will display a message and will not load.
 
 </details>
@@ -134,10 +135,11 @@ repos=(
 Insert the following code block before `autoload -Uz promptinit && promptinit`
 
 ```
-# this block after all completion definitions (the zstyle ':completion [...] stuff)
+# insert this block after all completion definitions (the zstyle ':completion [...] stuff)
+# for zsh-autocomplete you'll need ZSH Version 5.4 (maybe 5.8) or higher
+# read documentation of zsh-autocomplete
 if [[ -f "${ZPLUGINDIR}/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]] ; then
     source "${ZPLUGINDIR}/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
-# read documentation of zsh-autocomplete
 else
     # tweak compinit
     alias compinit='compinit-tweak'
@@ -147,10 +149,9 @@ else
     # now load plugins
     autoload -Uz compinit && compinit -C -d ${zdumpfile}
 fi
-# now load plugins
+#now load plugins
 plugin-load $repos
 # ZSH UNPLUGGED end
-# <------------------------------------------------------------------------------------>
 ```
 
 💡 Best practice: place the second code block right before your prompt definitions and - as already mentioned - mandatory before `autoload -Uz promptinit && promptinit`.
