@@ -22,7 +22,7 @@ diskguard_plugin_unload() {
     local cmd
     if [[ -n "${diskguard_commands:-}" ]]; then
         for cmd in ${(z)diskguard_commands}; do
-            print "DEBUG: unalias $cmd" > /dev/tty
+            #print "DEBUG: unalias $cmd" > /dev/tty
             unalias "$cmd"
         done
     fi
@@ -35,7 +35,7 @@ diskguard_plugin_unload() {
 
 #    print "DEBUG: checking if cleanup exists" > /dev/tty
     if ! typeset -f diskguard_cleanup >/dev/null 2>&1; then
-        print "DEBUG: sourcing cleanup" > /dev/tty
+        #print "DEBUG: sourcing cleanup" > /dev/tty
         source "${DISKGUARD_FUNC_DIR}/diskguard_cleanup"
     fi
 
