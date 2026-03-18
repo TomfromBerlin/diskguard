@@ -20,12 +20,12 @@
 # - Makes cursor invisible
 # ──────────────────────────────────────────────────────────────────
 _diskguard_init_term() {
-    printf '\n'                                          # Ensure space for progress bar
-    printf '\e[s'                                        # Save cursor location
-    printf '\e[%d;%dr' 1 "$((LINES - 1))"               # Set scrollable region (leave bottom line)
-    printf '\e[u'                                        # Restore cursor location
-    printf '\e[1A'                                       # Move cursor up one line
-    tput civis                                           # Make cursor invisible
+    printf '\n'                             # Ensure space for progress bar
+    printf '\e[s'                           # Save cursor location
+    printf '\e[%d;%dr' 1 "$((LINES - 1))"   # Set scrollable region (leave bottom line)
+    printf '\e[u'                           # Restore cursor location
+    printf '\e[1A'                          # Move cursor up one line
+    tput civis                              # Make cursor invisible
 }
 
 # ──────────────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ _diskguard_init_term() {
 # - Makes cursor visible again
 # ──────────────────────────────────────────────────────────────────
 _diskguard_deinit_term() {
-  printf '\e[s'                              # Save cursor location
+  printf '\e[s'                             # Save cursor location
   printf '\e[%d;%dr' 1 "$LINES"             # Reset scrollable region
   printf '\e[%d;%dH' "$LINES" 1             # Move to bottom line
   printf '\e[0K'                            # Clear the line
