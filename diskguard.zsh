@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 # Enable debug tracing only if DEBUG environment variable is set
 [[ -n "$DEBUG" ]] && set -x
-# ===================================================================
+# ──────────────────────────────────────────────────────────────────
 #  Zsh Disk Guard Plugin with Pac‑Man‑Style Progress Bar
 #  Intelligent disk space monitoring for write operations
 #
@@ -12,11 +12,8 @@
 # "You can lead a horse to water, but you can't make it read warnings."
 #                                               — Ancient IT Wisdom
 # ──────────────────────────────────────────────────────────────────
-# ===================================================================
+# Version Check
 # ──────────────────────────────────────────────────────────────────
-#  Version Check
-# ──────────────────────────────────────────────────────────────────
-# Load version comparison function
 if ! autoload -Uz is-at-least 2>/dev/null; then
     print -P "%F{red}Error: Cannot load is-at-least function%f" >&2
     return 1
@@ -707,6 +704,4 @@ it or delete the configuration file.")
                  ;;
          esac
     }
-
-    #compdef -k complete-word \C-x\C-r
 fi
