@@ -67,8 +67,7 @@ ${DISKGUARD_COLOR_CYAN}Debug Status${DISKGUARD_COLOR_NC}     = ${DISKGUARD_VAR_D
 ${DISKGUARD_COLOR_CYAN}Wrapped Commands${DISKGUARD_COLOR_NC} = ${DISKGUARD_COLOR_BLUE}${DISKGUARD_COMMANDS}${DISKGUARD_COLOR_NC}")
 
         footer=("Configuration has been written to
-${DISKGUARD_COLOR_BLUE}${config_file}${DISKGUARD_COLOR_NC}
-Press any key to continue...")
+${DISKGUARD_COLOR_BLUE}${config_file}${DISKGUARD_COLOR_NC}")
         clear
         diskguard_print_box \
         "${title[@]}" \
