@@ -9,7 +9,7 @@
   
 _Memo to self: They'll clone this repository again and again and not leave a single comment. Yes, not even a tiny star. But at least my code is traveling around the world._
 
-# Zsh DiskGuard Plugin
+# Disk🛡️Guard
 
 🛡️ Intelligent disk space monitoring for write operations in Zsh
 
@@ -54,14 +54,22 @@ Upgrade: See [zsh.org](https://www.zsh.org/)
  
 <details><summary>Standard Unix tools</summary>
 
-- df: Checks and displays the free disk space. Only mounted partitions are checked.
-- stat: Used here to determine the file system status instead of the file status.
-- du: Checks and displays the used disk space.
-- cp: to copy files from one place to another
+- awk: scripting language for editing and analyzing texts
+- cp: copy files from one place to another
+- cut: remove sections from each line of files
+- df: Checks and displays the free disk space. Only mounted partitions are checked
+- du: Checks and displays the used disk space
+- grep: print lines that match patterns
+- lsb_release: print distribution specific information
 - mv: rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY
-- furthermore: awk cut grep lsb_release rm sed sleep touch tput
+- rm: remove files or directories
+- sed: stands for [S]tream [ED]itor and is a Unix tool used to edit text data streams
+- sleep: pauses the executing process (essentially itself) for a specified time 
+- stat: Used here to determine the file system status instead of the file status
+- touch: Unix command-line program for changing access and modification timestamps; we use it to create marker files
+- tput: initialize a terminal or query terminfo database
 
-If one or more of these tools are unavailable, the plugin will display a message and will not load.
+If one or more of these tools are unavailable, the plugin will display a message and will not load, but this should only happen under TempleOS and MicroSlop Windows.
 
 </details>
 
@@ -140,12 +148,12 @@ Insert the following code block before `autoload -Uz promptinit && promptinit`
 if [[ -f "${ZPLUGINDIR}/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]] ; then
     source "${ZPLUGINDIR}/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 else
+    # this will not work with zsh-autocomplete
     # tweak compinit
     alias compinit='compinit-tweak'
     compinit-tweak() {
     grep -q "ZPLUGINDIR/*/*" <<< "${@}" && \compinit "${@}"
     }
-    # now load plugins
     autoload -Uz compinit && compinit -C -d ${zdumpfile}
 fi
 #now load plugins
@@ -207,7 +215,7 @@ source ~/.config/zsh/plugins/zsh-disk-guard/diskguard.plugin.zsh
 
 Simply remove from your plugin list and restart Zsh.
 
-### Temporary Disable
+### 🚫 Temporary Disable
 
 ```zsh
 
@@ -215,7 +223,7 @@ zshdg disable
 
 ```
 
-### To completely remove:
+### ❌ To completely remove:
 
 ```zsh
 
@@ -232,26 +240,26 @@ rm -rf ~/.config/zsh/plugins/diskguard
 
 The plugin performs a quick or deep disk check depending on the data size before write operations.
 
-- #### Quick Check (files <100 MiB):
+- #### ✅ Quick Check (files <100 MiB):
 
   - Uses stat only (fast)
   - Warns if disk >80% full
   - No size calculation
 
-- #### Deep Check (≥100 MiB or directories):
+- #### ☑️ Deep Check (≥100 MiB or directories):
 
   - Calculates actual size with du
   - Verifies available space
   - Prevents failed operations
 
-- #### Smart Skipping
+- #### 🧠 Smart Skipping
   
   - Automatically skips checks for:
     - Remote targets (rsync user@host:/path)
     - Options ending with - (rsync -av files -n)
     - Unclear syntax
 
-### Performance
+### 👟 Performance
 
 |Scenario|Overhead|Check Type|
 |-|-|-|
@@ -266,10 +274,8 @@ This plugin should be ready to use right out of the box and requires no further 
 <details><summary> ← click here for more</summary>
 
 ```zsh
-# Set these settings before loading the plugin.
-# To do this, run 'zshdg default' from the command line. Then you'll find a file named
-# 'diskguard.conf' in the plugin directory. Edit this file and change the settings.
-# or enter one or more of the following commands in the command line:
+# This settings can be changed at runtime. To do this, enter one or more of the
+# following commands in the command line:
 
 # set disk usage warning threshold to 90% (default value: 80%)
 zshdg threshold 90
@@ -283,7 +289,12 @@ zshdg debug
 # disable plugin (default: enable)
 zshdg disable
 
-# Run 'zshdg' to display more commands. Each command has several ways (long, medium, short) to invoke it.
+# Run 'zshdg' to display more commands. Each command has several ways
+# (long, medium, short) to invoke it.
+
+# After changing a value with on of these commands you'll find a file
+# named 'diskguard.conf' in the plugin directory.
+# You can edit this file to change the settings, too.
 
 # ──────────────────────────────────────────────────────────────────
 # Do not play around with the following settings! I'm serious!
@@ -327,7 +338,9 @@ zshdg threshold N    # set warn threshold in percent (N must be a number between
 ```zsh
 zshdg scan-theshold N    # set scan threshold in MB (N must be a number > 1)
 ```
+
 # 💬 Contribute
+
 Issues and PRs welcome at github.com/TomfromBerlin/zsh-disk-guard
 
 License: MIT
