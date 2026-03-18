@@ -152,7 +152,7 @@ _diskguard_mv() {
             while kill -0 $mv_pid 2>/dev/null; do
                 if [[ -f "$target_file" ]]; then
                     # Get current size of destination file
-                    # local cur_size tot_pct overall_pct cur_file_pct ← this will pollute the output
+                    # local cur_size cur_file_pct tot_pct overall_pct ← Do not declare these variables separately as 'local', as this will clutter the output.
                     local cur_size=$(set +x; command stat -c%s "$target_file" 2>/dev/null || command stat -f%z "$target_file" 2>/dev/null || echo 0)
 
                     # Calculate progress: (completed_files * 100 + current_file_percent) / total_files

@@ -101,7 +101,7 @@ _diskguard_cp() {
     _diskguard_init_term
 
     # ──────────────────────────────────────────────────────────────
-    # We need to enable a trap for ^C so that we can call tput cnorm
+    # We need to enable a trap for ^C so that we can call 'tput cnorm'
     # and the cursor will become visible again when ^C is pressed.
     # ──────────────────────────────────────────────────────────────
     trap '_diskguard_deinit_term; tput cnorm 2>/dev/null; printf "\n\n  ^C – operation cancelled\n\n"; return 1' INT
@@ -140,7 +140,7 @@ _diskguard_cp() {
         if (( source_size > 0 )); then
             while kill -0 $cp_pid 2>/dev/null; do
                 if [[ -f "$target_file" ]]; then
-                    # local cur_size cur_file_pct tot_pct overall_pct ← this will pollute the output
+                    # local cur_size cur_file_pct tot_pct overall_pct ← Do not declare these variables here as 'local', as this will clutter the output
                     # Get current size of destination file
                     local cur_size=$(set +x; command stat -c%s "$target_file" 2>/dev/null || command stat -f%z "$target_file" 2>/dev/null || echo 0)
 
