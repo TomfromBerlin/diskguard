@@ -24,7 +24,7 @@ diskguard_status() {
         enabled_status="${DISKGUARD_COLOR_RED}disabled${DISKGUARD_COLOR_NC}"
     fi
 
-    if [[ -n $DB_VAR ]] ; then
+    if [[ -n $DISKGUARD_DEBUG ]] ; then
         debug_status="${DISKGUARD_COLOR_GREEN}enabled${DISKGUARD_COLOR_NC}"
     else
         debug_status="${DISKGUARD_COLOR_RED}disabled${DISKGUARD_COLOR_NC}"
@@ -50,13 +50,4 @@ ${DISKGUARD_COLOR_GREY}→ man stat, man du${DISKGUARD_COLOR_NC}
         ${title[@]} \
         ${body[@]} \
         "${footer[@]}"
-
-#     print -P "%F{blue}═══ Zsh Disk Guard Status ═══%f"
-#     print -P "  Enabled: ${enabled_status}"
-#     print -P "  Threshold: ${DISKGUARD_COLOR_YELLOW_BOLD}${DISKGUARD_THRESHOLD}${DISKGUARD_COLOR_NC}"
-#     print -P "  Deep check threshold: $DISKGUARD_SCAN_THRESHOLD"
-#     print -P "  Debug: ${debug_status}"
-#     print -P "  Wrapped commands: %F{cyan}${DISKGUARD_COMMANDS}%f"
-
 }
-
