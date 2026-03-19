@@ -2,10 +2,5 @@
 *_template
 *.conf
 *.bak
-functions/_zshdg_comp_alt
-functions/_zshdg_comp
-functions/diskguard_tpwrtr
-functions/diskguard_func_size
-functions/zshdg
 *.kate-swp
 *.old
