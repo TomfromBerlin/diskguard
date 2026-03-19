@@ -30,6 +30,11 @@ diskguard_ui_init() {
     distro="$(awk -F= '/^DISTRIB_ID/ {print $2}' /etc/lsb-release)"
     fi
 
+    # Disable color in dumb terminals.
+    if [[ "$TERM" == 'dumb' && -f "${DISKGUARD_PLUGIN_DIR}"/color ]]; then
+        command rm  -f "${DISKGUARD_PLUGIN_DIR}"/color &>/dev/null
+    fi
+
     if [[ -f "${DISKGUARD_PLUGIN_DIR}"/color ]] ; then
         #unset DISKGUARD_COLOR_{BLUE,BLUE_BOLD,BLUE_DIM,CYAN,CYAN_BOLD,CYAN_DIM,GREEN,GREEN_BOLD,GREY,GREY_BOLD,GREY_DIM,ITALIC,MAGENTA,MAGENTA_BOLD,MAGENTA_DIM,RED,RED_BOLD,YELLOW,YELLOW_BOLD,YELLOW_DIM,WHITE,WHITE_FLASH}
         DISKGUARD_COLOR_BLUE=$'\e[0;34;40m'
@@ -90,7 +95,6 @@ diskguard_normalize_wide_placeholder() {
     setopt LOCALOPTIONS
 
     # e_w = emoji_widths mapping (emoji → display width in 'O' chars)
-    local distro
     distro=$(lsb_release -si) || distro="$(awk -F= '/^ID=/ {print $2}' /etc/os-release)" || distro="$(awk -F= '/^ID_LIKE=/ {print $2}' /etc/os-release)" || distro="$(awk -F= '/^NAME=/ {print $2}' /etc/os-release)" || distro="$(awk -F= '/^PRETTY_NAME=/ {print $2}' /etc/os-release)"
     case "${distro}" in
     *mint*|*LinuxMint*|*Ubuntu*|*void*|*VoidLinux*|*voidlinux*)
