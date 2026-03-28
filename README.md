@@ -346,3 +346,6 @@ Issues and PRs welcome at github.com/TomfromBerlin/zsh-disk-guard
 License: MIT
 
 Author: Tom (from Berlin)
+
+
+[![Star History Chart](https://api.star-history.com/image?repos=TomfromBerlin/diskguard&type=date&legend=top-left)](https://www.star-history.com/?repos=TomfromBerlin%2Fdiskguard&type=date&legend=top-left)
