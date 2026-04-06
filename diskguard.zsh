@@ -19,14 +19,14 @@ if ! autoload -Uz is-at-least 2>/dev/null; then
     return 1
 fi
 #
-# Require Zsh 5.0+
+# Zsh versions older than 5.0.8 don't implement signals other than ZERR but we use TRAPINT and TRAPWINCH
 autoload -Uz is-at-least
-if ! is-at-least 5.0; then
+if ! is-at-least 5.0.8; then
     gdbus call --session \
     --dest=org.freedesktop.Notifications \
     --object-path=/org/freedesktop/Notifications \
     --method=org.freedesktop.Notifications.Notify \
-    "" 0 "" "diskguard Plugin Message" "Unsupported Zsh version $ZSH_VERSION. Expecting Zsh 5.0+! The plugin diskguard was not loaded." \
+    "" 0 "" "diskguard Plugin Message" "Unsupported Zsh version $ZSH_VERSION. Expecting Zsh 5.0.8+! The plugin diskguard was not loaded." \
     '[]' '{"urgency": <1>}' 30000
     return 1
 fi

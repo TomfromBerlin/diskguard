@@ -114,7 +114,23 @@ _diskguard_mv() {
     # We need to enable a trap for ^C so that we can call tput cnorm
     # and the cursor will become visible again when ^C is pressed.
     # ──────────────────────────────────────────────────────────────
-    trap '_diskguard_deinit_term; tput cnorm 2>/dev/null; printf "\n^C – operation cancelled\n"; return 1' INT
+    interrupted=false
+    trap '_diskguard_deinit_term; tput cnorm 2>/dev/null; interrupted=true' INT TERM
+
+    for ((i = 0; i < 100; ++i)); do
+        clear
+        date
+        sleep 1
+
+        if [[ "${interrupted}" = "true" ]]; then
+            printf '%s\n' " → Ctrl+C was pressed – operation cancelled"; return 1
+            break
+        fi
+    done
+
+    # TRAPINT()   { diskguard_cleanup; }
+    # TRAPTERM()  { TRAPINT; }
+    TRAPWINCH() { clear; col=$(tput cols); lines_raw=$(tput lines); }
 
     # Disable job control messages
     setopt LOCAL_OPTIONS NO_NOTIFY NO_MONITOR
@@ -127,7 +143,7 @@ _diskguard_mv() {
 
         # Display current file with size
         local size_display=$(_diskguard_format_size $source_size)
-        printf '→ %s (%s)\n' "${source:t}" "$size_display"
+        printf '\n    → %s (%s)' "${source:t}" "$size_display"
 
         # local target_file ← this produces unwanted output
         target_file="$target/${source:t}"

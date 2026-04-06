@@ -14,12 +14,22 @@
 #                                                                        #
 # TomfromBerlin 2025-2026                                                #
 ##########################################################################
-zramdisk_cleanup() {
+diskguard_cleanup() {
     {
         unset title body footer msg cfg enabled_{plugin,status} input val var size \
             diskguard_{commands,debug,dir,enabled,loaded} \
             DISKGUARD_{PLUGIN_DIR,FUNC_DIR} \
             DISKGUARD_COLOR_{BLUE,BLUE_BOLD,BLUE_DIM,CYAN,CYAN_BOLD,CYAN_DIM,GREEN,GREEN_BOLD,GREY,GREY_BOLD,GREY_DIM,ITALIC,MAGENTA,MAGENTA_BOLD,MAGENTA_DIM,RED,RED_BOLD,YELLOW,YELLOW_BOLD,YELLOW_DIM,WHITE,WHITE_FLASH}
+
+        printf '\e[s'                             # Save cursor location
+        printf '\e[%d;%dr' 1 "$LINES"             # Reset scrollable region
+        printf '\e[%d;%dH' "$LINES" 1             # Move to bottom line
+        printf '\e[0K'                            # Clear the line
+        printf '\e[u'                             # Restore cursor location
+        tput cnorm                                # Make cursor visible
+
+        # tput sgr0
+        # tput rmcup                  # if smcup was used
     } &>/dev/null
 
     return 0
