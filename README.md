@@ -203,10 +203,11 @@ You can load the plugin with any other pluginmanagers as well.
 
 ```zsh
 git clone https://github.com/TomfromBerlin/diskguard ~/.config/zsh/plugins/diskguard
-echo "source ~/.config/zsh/plugins/disk-guard/diskguard.plugin.zsh" >> ~/.zshrc
+echo "source ~/.config/zsh/plugins/diskguard/diskguard.plugin.zsh" >> ~/.zshrc
 source ~/.zshrc
 ```
-This causes the plugin to load at the very end of the session startup. If you want to load the plugin earlier, you need to manually edit your .zshrc-file and move the line `source ~/.config/zsh/plugins/disk-guard/diskguard.plugin.zsh` to the desired position.
+This causes the plugin to load at the very end of the session startup. If you want to load the plugin earlier, you need to manually edit your zshrc-file and move the line `source ~/.config/zsh/plugins/disk-guard/diskguard.plugin.zsh` to the desired position.
+
 </details>
 
 ## 🧹 Uninstall
@@ -231,7 +232,7 @@ zshdg unload
 rm -rf ~/.config/zsh/plugins/diskguard
 
 ```
-Of course, you need to remove the entry from your plugin list (or the line where the plugin file is included) from you .zshrc-file. Otherwise, the plugin will likely be reinstalled the next time you start a session.
+Of course, you need to remove the entry from your plugin list (or the line where the plugin file is sourced) from your zshrc-file. Otherwise, the plugin will likely be reinstalled the next time you start a session.
 
 </details>
 
