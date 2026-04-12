@@ -18,10 +18,9 @@ _Memo to self: They'll clone this repository again and again and not leave a sin
 ```zsh
  # Install
  git clone https://github.com/TomfromBerlin/diskguard ~/.config/zsh/plugins/diskguard
- echo "source ~/.config/zsh/plugins/zsh-disk-guard/diskguard.plugin.zsh" >> ~/.zshrc
- source ~/.zshrc
+ source ~/.config/zsh/plugins/diskguard/diskguard.plugin.zsh
 ```
-This will only run the plugin temporarily. For permanent installation (also with the plugin manager or framework of your choice), see the 🛠️ Install section.
+This is is quick&dirty. For a better (more sophisticated) installation (also with the plugin manager or framework of your choice), see the 🛠️ Install section.
 </details>
 
 ## ✨ Features
@@ -204,16 +203,17 @@ You can load the plugin with any other pluginmanagers as well.
 
 ```zsh
 git clone https://github.com/TomfromBerlin/diskguard ~/.config/zsh/plugins/diskguard
-source ~/.config/zsh/plugins/zsh-disk-guard/diskguard.plugin.zsh
+echo "source ~/.config/zsh/plugins/disk-guard/diskguard.plugin.zsh" >> ~/.zshrc
+source ~/.zshrc
 ```
-
+This causes the plugin to load at the very end of the session startup. If you want to load the plugin earlier, you need to manually edit your .zshrc-file and move the line `source ~/.config/zsh/plugins/disk-guard/diskguard.plugin.zsh` to the desired position.
 </details>
 
 ## 🧹 Uninstall
 
 <details><summary> ← click here</summary>
 
-Simply remove from your plugin list and restart Zsh.
+Simply remove the entry from your plugin list (or remove the line where the plugin file is included) and restart Zsh.
 
 ### 🚫 Temporary Disable
 
@@ -231,6 +231,7 @@ zshdg unload
 rm -rf ~/.config/zsh/plugins/diskguard
 
 ```
+Of course, you need to remove the entry from your plugin list (or the line where the plugin file is included) from you .zshrc-file. Otherwise, the plugin will likely be reinstalled the next time you start a session.
 
 </details>
 
